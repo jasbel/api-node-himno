@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { DatabaseModule } from '../database/database.module';
-import { ISong } from './interfaces/song.interface';
+import { ISong, ISongCreate } from './interfaces/song.interface';
 import { SongsQueries } from './providers/songs.queries';
 
 export class SongsService {
@@ -12,20 +12,20 @@ export class SongsService {
     });
   }
 
-  async create(songData: ISong) {
+  async create(songData: ISongCreate) {
     const id = uuidv4();
     const query = SongsQueries.CREATE;
 
     const paragraphsString = JSON.stringify(songData.paragraphs);
+    const chorusString = JSON.stringify(songData.chorus);
 
     await this.db.run(query, [
       id,
-      songData.num_song,
+      songData.code,
       songData.title,
-      songData.description,
       songData.musicalNote,
       paragraphsString,
-      songData.chorus
+      chorusString
     ]);
 
     return { id, ...songData };
@@ -37,7 +37,10 @@ export class SongsService {
       ...s,
       paragraphs: typeof s.paragraphs === 'string'
         ? JSON.parse(s.paragraphs)
-        : s.paragraphs
+        : s.paragraphs,
+      chorus: typeof s.chorus === 'string'
+        ? JSON.parse(s.chorus)
+        : s.chorus,
     }));
   }
 
@@ -47,7 +50,10 @@ export class SongsService {
       ...song,
       paragraphs: typeof song.paragraphs === 'string'
         ? JSON.parse(song.paragraphs)
-        : song.paragraphs
+        : song.paragraphs,
+      chorus: typeof song.chorus === 'string'
+        ? JSON.parse(song.chorus)
+        : song.chorus,
     } : null;
   }
 
@@ -55,12 +61,11 @@ export class SongsService {
     const query = SongsQueries.UPDATE;
 
     const result = await this.db.run(query, [
-      songData.num_song,
+      songData.code,
       songData.title,
-      songData.description,
       songData.musicalNote,
       JSON.stringify(songData.paragraphs),
-      songData.chorus,
+      JSON.stringify(songData.chorus),
       id
     ]);
 

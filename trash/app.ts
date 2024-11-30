@@ -2,7 +2,6 @@ import express, { Request, Response } from 'express';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import { v4 as uuidv4 } from 'uuid';
-import { ISong } from './types';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -45,7 +44,7 @@ app.post('/songs', async (req: Request, res: Response) => {
       description,
       musicalNote,
       paragraphs,
-      chorus
+      chorus,
     } = req.body;
 
     const id = uuidv4();
@@ -78,7 +77,7 @@ app.post('/songs', async (req: Request, res: Response) => {
 // Get all songs
 app.get('/songs', async (req: Request, res: Response) => {
   try {
-    let songs: ISong[] = await db.all('SELECT * FROM songs');
+    let songs: any[] = await db.all('SELECT * FROM songs');
     songs.forEach((s, i) => {
       const paragraphs = typeof s.paragraphs === 'string'
         ? JSON.parse(<string>s.paragraphs)

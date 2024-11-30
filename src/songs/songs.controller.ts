@@ -23,7 +23,7 @@ export class SongsController {
       const song = await this.songsService.create(req.body);
       res.status(201).json(song);
     } catch (error) {
-      res.status(500).json({ error: 'Error creating song' });
+      res.status(500).json({ error: 'Error creating song ' + error });
     }
   }
 
