@@ -1,5 +1,6 @@
 import express from 'express';
 import { SongsModule } from './songs/songs.module';
+import cors from 'cors';
 
 export class AppModule {
   private app: express.Application;
@@ -11,6 +12,7 @@ export class AppModule {
   }
 
   private initializeMiddlewares() {
+    this.app.use(cors());
     this.app.use(express.json());
   }
 
