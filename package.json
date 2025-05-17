@@ -9,7 +9,7 @@
     "build:old": "tsc",
     "start": "tsx src/main.ts",
     "dev": "tsx watch src/main.ts",
-    "build": "tsc",
+    "build": "tsc && node fix-imports.js",
     "serve": "node dist/main.js"
   },
   "dependencies": {
