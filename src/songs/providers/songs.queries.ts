@@ -9,8 +9,8 @@ const songTableConfig = {
     code: { name: 'code', attr: 'TEXT' },
     title: { name: 'title', attr: 'TEXT' },
     musicalNote: { name: 'musicalnote', attr: 'TEXT' },
-    paragraphs: { name: 'paragraphs', attr: 'TEXT' }, // JSONB
-    chorus: { name: 'chorus', attr: 'TEXT' },
+    paragraphs: { name: 'paragraphs', attr: 'JSONB' }, // JSONB
+    chorus: { name: 'chorus', attr: 'JSONB' },
   }
 };
 

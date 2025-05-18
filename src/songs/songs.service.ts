@@ -17,6 +17,11 @@ const safeParse = (val: string | unknown) => {
   return val;
 }
 
+const safeVerifyParse = (data: unknown) => {
+  return JSON.stringify(data ?? null)
+
+}
+
 export class SongsService {
   private db: Pool;
 
@@ -27,8 +32,8 @@ export class SongsService {
   async create(songData: ISongCreate) {
     const id = uuidv4();
     const query = SongsQueries.CREATE;
-    const paragraphsString = JSON.stringify(songData.paragraphs ?? null);
-    const chorusString = JSON.stringify(songData.chorus ?? null);
+    const paragraphsString = safeVerifyParse(songData.paragraphs);
+    const chorusString = safeVerifyParse(songData.chorus);
 
     await this.db.query(query, [
       id,
