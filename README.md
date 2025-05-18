@@ -28,3 +28,11 @@ api de prueba para crear
     "chorus": "['chorus']"
 }
 ```
+# docker execute
+`chmod +x bash.sh`
+`zsh bash.sh`
+`#!/bash/zsh`
+Comando de depuracion
+`zsh -x bash.sh`
+verificar la codificaon del archivo
+`file bash.sh`

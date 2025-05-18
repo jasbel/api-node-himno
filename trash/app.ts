@@ -5,7 +5,7 @@ import { open } from 'sqlite';
 import { v4 as uuidv4 } from 'uuid';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8001;
 
 // Configurar CORS - habilita CORS para todos los orígenes (o personaliza según sea necesario)
 app.use(cors()); 

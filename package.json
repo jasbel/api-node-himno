@@ -1,16 +1,20 @@
 {
   "name": "api-himno",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
     "start:old": "node --watch --loader ts-node/esm ./src/app.ts",
     "dev:old": "node --watch --loader ts-node/esm ./src/app.ts",
     "start:dev": "node --watch --loader ts-node/esm ./src/main.ts",
     "build:old": "tsc",
     "start": "tsx src/main.ts",
-    "dev": "tsx watch src/main.ts",
+    "pm2:startts": "pm2 start src/main.ts --name api-himno --watch --interpreter ts-node",
+    "pm2:deploy2": "pm2 start ecosystem.config.js",
+    "pm2:deploy3": "pm2 start dist/main.js --name api-himno --watch --watch-delay 1000 --ignore-watch='node_modules src'",
+    "pm2:deploy4": "pm2 start ./dist/main.js --name api-himno-pm2 --watch",
+    "pm2:deploy": "pm2 start ./dist/main.js --no-daemon --name api-himno --watch --watch-delay 1000 --ignore-watch='node_modules src'",
     "build": "tsc",
-    "serve": "node dist/main.js"
+    "dev": "tsx watch src/main.ts",
+    "serve": "node ./dist/main.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
