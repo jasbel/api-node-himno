@@ -1,33 +1,47 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
+import { Pool } from 'pg';
 import { ENV } from '../common/config/environment.config';
 import { SongsQueries } from '../songs/providers/songs.queries';
 
 export class DatabaseModule {
-  private static instance: any;
+  private static instance: Pool;
 
-  static async connect() {
-    if (!this.instance) {
-      try {
-        this.instance = await open({
-          filename: ENV.DATABASE_PATH,
-          driver: sqlite3.Database
-        });
+  private constructor() {}
 
-        // Create songs table if not exists
-        await this.instance.exec(SongsQueries.CREATE_TABLE);
+  static getInstance(): Pool {
+    if (!DatabaseModule.instance) {
+      DatabaseModule.instance = new Pool({
+        user: ENV.DB_USER,
+        host: ENV.DB_HOST,
+        database: ENV.DB_NAME,
+        password: ENV.DB_PASS,
+        port: Number(ENV.DB_PORT) || 5432,
+        ssl: ENV.DB_SSL ? { rejectUnauthorized: false } : undefined,
+      });
 
-        console.log('Connected to the DB');
-        return this.instance;
-      } catch (err) {
-        console.error('Error connecting to SQLite:', err);
-        throw err;
-      }
+      DatabaseModule.instance.on('error', (err) => {
+        console.error('Unexpected error on idle PostgreSQL client', err);
+        process.exit(-1);
+      });
     }
-    return this.instance;
+
+    return DatabaseModule.instance;
   }
 
-  static getInstance() {
-    return this.instance;
+  static async connect(): Promise<void> {
+    const pool = DatabaseModule.getInstance();
+    try {
+      await pool.query('SELECT 1'); // prueba simple para verificar conexión
+      console.log('PostgreSQL connected successfully');
+    } catch (error) {
+      console.error('Failed to connect to PostgreSQL', error);
+      throw error;
+    }
+  }
+
+  static async initialize() {
+    const pool = this.getInstance();
+    const createTableSQL = SongsQueries.CREATE_TABLE;
+    await pool.query(createTableSQL);
+    console.log('Table "songs" ensured.');
   }
 }
