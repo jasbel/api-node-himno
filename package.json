@@ -10,7 +10,12 @@
     "start": "tsx src/main.ts",
     "dev": "tsx watch src/main.ts",
     "build": "tsc && node fix-imports.js",
-    "serve": "node dist/main.js"
+    "serve": "node dist/main.js",
+    "pm2:startts": "pm2 start src/main.ts --name api-himno --watch --interpreter ts-node",
+    "pm2:deploy2": "pm2 start ecosystem.config.js",
+    "pm2:deploy3": "pm2 start dist/main.js --name api-himno --watch --watch-delay 1000 --ignore-watch='node_modules src'",
+    "pm2:deploy4": "pm2 start ./dist/main.js --name api-himno-pm2 --watch",
+    "pm2:deploy": "pm2 start ./dist/main.js --no-daemon --name api-himno --watch --watch-delay 1000 --ignore-watch='node_modules src'"
   },
   "dependencies": {
     "cors": "^2.8.5",
