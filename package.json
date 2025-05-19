@@ -3,15 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start:old": "node --watch --loader ts-node/esm ./src/app.ts",
-    "dev:old": "node --watch --loader ts-node/esm ./src/app.ts",
-    "start:dev": "node --watch --loader ts-node/esm ./src/main.ts",
-    "build:old": "tsc",
     "start": "tsx src/main.ts",
     "dev": "tsx watch src/main.ts",
     "build": "tsc && node fix-imports.js",
     "serve": "node dist/main.js",
-    "pm2:startts": "pm2 start src/main.ts --name api-himno --watch --interpreter ts-node",
     "pm2:deploy2": "pm2 start ecosystem.config.js",
     "pm2:deploy3": "pm2 start dist/main.js --name api-himno --watch --watch-delay 1000 --ignore-watch='node_modules src'",
     "pm2:deploy4": "pm2 start ./dist/main.js --name api-himno-pm2 --watch",
@@ -19,10 +14,9 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
     "express": "^4.21.1",
     "pg": "^8.16.0",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7",
     "uuid": "^11.0.3"
   },
   "devDependencies": {
@@ -31,7 +25,6 @@
     "@types/node": "^20.4.2",
     "@types/pg": "^8.15.2",
     "@types/uuid": "^9.0.2",
-    "ts-node": "^10.9.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }

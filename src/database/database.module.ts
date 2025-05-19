@@ -5,7 +5,7 @@ import { SongsQueries } from '../songs/providers/songs.queries';
 export class DatabaseModule {
   private static instance: Pool;
 
-  private constructor() {}
+  private constructor() { }
 
   static getInstance(): Pool {
     if (!DatabaseModule.instance) {
@@ -14,7 +14,7 @@ export class DatabaseModule {
         host: ENV.DB_HOST,
         database: ENV.DB_NAME,
         password: ENV.DB_PASS,
-        port: Number(ENV.DB_PORT) || 5432,
+        port: Number(ENV.DB_PORT || 5432),
         ssl: ENV.DB_SSL ? { rejectUnauthorized: false } : undefined,
       });
 
