@@ -28,3 +28,13 @@ api de prueba para crear
     "chorus": "['chorus']"
 }
 ```
+
+docker run --name my-postgres -e POSTGRES_DB=songsdb -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=yourpassword -p 5432:5432 -d postgres
+# docker execute
+`chmod +x bash.sh`
+`zsh bash.sh`
+`#!/bash/zsh`
+Comando de depuracion
+`zsh -x bash.sh`
+verificar la codificaon del archivo
+`file bash.sh`

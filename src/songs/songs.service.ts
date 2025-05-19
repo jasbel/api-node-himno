@@ -1,25 +1,41 @@
+//songs.services.ts
+
 import { v4 as uuidv4 } from 'uuid';
 import { DatabaseModule } from '../database/database.module';
 import { ISong, ISongCreate } from './interfaces/song.interface';
 import { SongsQueries } from './providers/songs.queries';
+import { Pool } from 'pg';
+
+const safeParse = (val: string | unknown) => {
+  if (typeof val === 'string') {
+    try {
+      return JSON.parse(val);
+    } catch {
+      return val; // o null si prefieres
+    }
+  }
+  return val;
+}
+
+const safeVerifyParse = (data: unknown) => {
+  return JSON.stringify(data ?? null)
+
+}
 
 export class SongsService {
-  private db: any;
+  private db: Pool;
 
   constructor() {
-    DatabaseModule.connect().then(db => {
-      this.db = db;
-    });
+    this.db = DatabaseModule.getInstance();
   }
 
   async create(songData: ISongCreate) {
     const id = uuidv4();
     const query = SongsQueries.CREATE;
+    const paragraphsString = safeVerifyParse(songData.paragraphs);
+    const chorusString = safeVerifyParse(songData.chorus);
 
-    const paragraphsString = JSON.stringify(songData.paragraphs);
-    const chorusString = JSON.stringify(songData.chorus);
-
-    await this.db.run(query, [
+    await this.db.query(query, [
       id,
       songData.code,
       songData.title,
@@ -31,49 +47,45 @@ export class SongsService {
     return { id, ...songData };
   }
 
+
   async findAll(): Promise<ISong[]> {
-    let songs: ISong[] = await this.db.all(SongsQueries.FIND_ALL);
-    return songs.map(s => ({
+    const result = await this.db.query(SongsQueries.FIND_ALL);
+    return result.rows.map((s: any) => ({
       ...s,
-      paragraphs: typeof s.paragraphs === 'string'
-        ? JSON.parse(s.paragraphs)
-        : s.paragraphs,
-      chorus: typeof s.chorus === 'string'
-        ? JSON.parse(s.chorus)
-        : s.chorus,
+      paragraphs: safeParse(s.paragraphs),
+      chorus: safeParse(s.chorus),
     }));
   }
 
   async findOne(id: string): Promise<ISong | null> {
-    const song = await this.db.get(SongsQueries.FIND_ONE, [id]);
-    return song ? {
-      ...song,
-      paragraphs: typeof song.paragraphs === 'string'
-        ? JSON.parse(song.paragraphs)
-        : song.paragraphs,
-      chorus: typeof song.chorus === 'string'
-        ? JSON.parse(song.chorus)
-        : song.chorus,
-    } : null;
+    const result = await this.db.query(SongsQueries.FIND_ONE, [id]);
+    const song = result.rows[0];
+    return song
+      ? {
+        ...song,
+        paragraphs: safeParse(song.paragraphs),
+        chorus: safeParse(song.chorus),
+      }
+      : null;
   }
 
-  async update(id: string, songData: Partial<ISong>) {
+  async update(id: string, songData: Partial<ISong>): Promise<boolean> {
     const query = SongsQueries.UPDATE;
 
-    const result = await this.db.run(query, [
+    const result = await this.db.query(query, [
       songData.code,
       songData.title,
       songData.musicalNote,
-      JSON.stringify(songData.paragraphs),
-      JSON.stringify(songData.chorus),
+      JSON.stringify(songData.paragraphs ?? null),
+      JSON.stringify(songData.chorus ?? null),
       id
     ]);
 
-    return result.changes > 0;
+    return (result.rowCount || 0) > 0;
   }
 
-  async remove(id: string) {
-    const result = await this.db.run(SongsQueries.DELETE, [id]);
-    return result.changes > 0;
+  async remove(id: string): Promise<boolean> {
+    const result = await this.db.query(SongsQueries.DELETE, [id]);
+    return (result.rowCount || 0) > 0;
   }
 }
