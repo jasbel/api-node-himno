@@ -1,8 +1,0 @@
-node_modules
-dist
-trash
-Dockerfile
-.dockerignore
-bash.sh
-*.log
-docker

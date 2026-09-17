@@ -1,14 +1,23 @@
 // songs.controller.ts
-import express, { Request, Response } from 'express';
+import { Hono } from 'hono';
+import type { Context } from 'hono';
+import type { Bindings } from '../types';
 import { SongsService } from './songs.service';
+import type { ISong, ISongCreate } from './song.interface';
+
+type AppContext = Context<{ Bindings: Bindings }>;
 
 export class SongsController {
-  private router = express.Router();
-  private songsService: SongsService;
+  private router: Hono<{ Bindings: Bindings }>;
 
   constructor() {
-    this.songsService = new SongsService();
+    this.router = new Hono<{ Bindings: Bindings }>();
     this.initRoutes();
+  }
+
+  // El servicio se construye por petición con el binding D1 del entorno
+  private getSongsService(env: Bindings): SongsService {
+    return new SongsService(env.DB);
   }
 
   private initRoutes() {
@@ -19,60 +28,59 @@ export class SongsController {
     this.router.delete('/:id', this.deleteSong.bind(this));
   }
 
-  async createSong(req: Request, res: Response) {
+  async createSong(c: AppContext) {
     try {
-      const song = await this.songsService.create(req.body);
-      res.status(201).json(song);
+      const songData = await c.req.json<ISongCreate>();
+      const song = await this.getSongsService(c.env).create(songData);
+      return c.json(song, 201);
     } catch (error) {
-      res.status(500).json({ error: 'Error creating song ' + error });
+      return c.json({ error: 'Error creating song ' + String(error) }, 500);
     }
   }
 
-  async getAllSongs(req: Request, res: Response) {
+  async getAllSongs(c: AppContext) {
     try {
-      const songs = await this.songsService.findAll();
-      res.json(songs);
+      const songs = await this.getSongsService(c.env).findAll();
+      return c.json(songs);
     } catch (error) {
-      res.status(500).json({ error: 'Error fetching songs: ' + error });
+      return c.json({ error: 'Error fetching songs: ' + String(error) }, 500);
     }
   }
 
-  async getSongById(req: Request, res: Response) {
+  async getSongById(c: AppContext) {
     try {
-      const song = await this.songsService.findOne(req.params.id);
+      const song = await this.getSongsService(c.env).findOne(c.req.param('id') as string);
       if (song) {
-        res.json(song);
-      } else {
-        res.status(404).json({ error: 'Song not found' });
+        return c.json(song);
       }
+      return c.json({ error: 'Song not found' }, 404);
     } catch (error) {
-      res.status(500).json({ error: 'Error fetching song' });
+      return c.json({ error: 'Error fetching song' }, 500);
     }
   }
 
-  async updateSong(req: Request, res: Response) {
+  async updateSong(c: AppContext) {
     try {
-      const updated = await this.songsService.update(req.params.id, req.body);
+      const songData = await c.req.json<Partial<ISong>>();
+      const updated = await this.getSongsService(c.env).update(c.req.param('id') as string, songData);
       if (updated) {
-        res.json({ message: 'Song updated successfully' });
-      } else {
-        res.status(404).json({ error: 'Song not found' });
+        return c.json({ message: 'Song updated successfully' });
       }
+      return c.json({ error: 'Song not found' }, 404);
     } catch (error) {
-      res.status(500).json({ error: 'Error updating song' });
+      return c.json({ error: 'Error updating song' }, 500);
     }
   }
 
-  async deleteSong(req: Request, res: Response) {
+  async deleteSong(c: AppContext) {
     try {
-      const deleted = await this.songsService.remove(req.params.id);
+      const deleted = await this.getSongsService(c.env).remove(c.req.param('id') as string);
       if (deleted) {
-        res.json({ message: 'Song deleted successfully' });
-      } else {
-        res.status(404).json({ error: 'Song not found' });
+        return c.json({ message: 'Song deleted successfully' });
       }
+      return c.json({ error: 'Song not found' }, 404);
     } catch (error) {
-      res.status(500).json({ error: 'Error deleting song' });
+      return c.json({ error: 'Error deleting song' }, 500);
     }
   }
 
